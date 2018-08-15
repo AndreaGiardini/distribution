@@ -260,6 +260,10 @@ func (buh *blobUploadHandler) PutBlobUploadComplete(w http.ResponseWriter, r *ht
 
 		return
 	}
+	//ctxu.GetLogger(buh).Info("BLOB UPLOAD: ", buh.State.)
+
+
+
 	if err := buh.writeBlobCreatedHeaders(w, desc); err != nil {
 		buh.Errors = append(buh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))
 		return

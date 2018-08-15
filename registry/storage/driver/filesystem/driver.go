@@ -16,6 +16,10 @@ import (
 	storagedriver "github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/registry/storage/driver/base"
 	"github.com/docker/distribution/registry/storage/driver/factory"
+	"strings"
+
+	"github.com/anacrolix/torrent/metainfo"
+	"github.com/anacrolix/torrent/bencode"
 )
 
 const (
@@ -159,7 +163,10 @@ func (d *driver) GetContent(ctx context.Context, path string) ([]byte, error) {
 
 // PutContent stores the []byte content at a location designated by "path".
 func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte) error {
+
+
 	writer, err := d.Writer(ctx, subPath, false)
+
 	if err != nil {
 		return err
 	}
@@ -169,7 +176,37 @@ func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte
 		writer.Cancel()
 		return err
 	}
-	return writer.Commit()
+	returnCode := writer.Commit()
+
+	if strings.HasSuffix(subPath,"data") {
+		fmt.Println("I AM CREATING THE TORRENT")
+		builtinAnnounceList := [][]string{
+				{"udp://thisismytorrent:80"},
+			}
+
+		mi := metainfo.MetaInfo{
+			AnnounceList: builtinAnnounceList,
+		}
+		mi.SetDefaults()
+		info := metainfo.Info{
+			PieceLength: 256 * 1024,
+		}
+		err := info.BuildFromFilePath(d.fullPath(subPath))
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		mi.InfoBytes, err = bencode.Marshal(info)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		writerTorrent, err := d.Writer(ctx, subPath + ".torrent", false)
+		err = mi.Write(writerTorrent)
+		writerTorrent.Commit()
+	}
+
+	return returnCode
 }
 
 // Reader retrieves an io.ReadCloser for the content stored at "path" with a
