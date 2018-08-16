@@ -180,7 +180,6 @@ func (bs *blobStatter) Stat(ctx context.Context, dgst digest.Digest) (distributi
 		digest: dgst,
 	})
 
-
 	if err != nil {
 		return distribution.Descriptor{}, err
 	}

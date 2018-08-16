@@ -10,7 +10,7 @@ WORKDIR $DISTRIBUTION_DIR
 COPY . $DISTRIBUTION_DIR
 COPY cmd/registry/config-example.yml /etc/docker/registry/config.yml
 
-RUN go get github.com/anacrolix/torrent/bencode github.com/anacrolix/torrent/metainfo
+RUN go get github.com/anacrolix/torrent github.com/anacrolix/torrent/bencode github.com/anacrolix/torrent/metainfo
 RUN make PREFIX=/go clean binaries
 
 VOLUME ["/var/lib/registry"]

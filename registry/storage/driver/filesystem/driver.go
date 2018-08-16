@@ -18,8 +18,9 @@ import (
 	"github.com/docker/distribution/registry/storage/driver/factory"
 	"strings"
 
-	"github.com/anacrolix/torrent/metainfo"
 	"github.com/anacrolix/torrent/bencode"
+	"github.com/anacrolix/torrent/metainfo"
+	"github.com/docker/distribution/registry/torrentclient"
 )
 
 const (
@@ -164,7 +165,6 @@ func (d *driver) GetContent(ctx context.Context, path string) ([]byte, error) {
 // PutContent stores the []byte content at a location designated by "path".
 func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte) error {
 
-
 	writer, err := d.Writer(ctx, subPath, false)
 
 	if err != nil {
@@ -178,11 +178,11 @@ func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte
 	}
 	returnCode := writer.Commit()
 
-	if strings.HasSuffix(subPath,"data") {
+	if strings.HasSuffix(subPath, "data") {
 		fmt.Println("I AM CREATING THE TORRENT")
 		builtinAnnounceList := [][]string{
-				{"udp://thisismytorrent:80"},
-			}
+			{"udp://thisismytorrent:80"},
+		}
 
 		mi := metainfo.MetaInfo{
 			AnnounceList: builtinAnnounceList,
@@ -201,9 +201,15 @@ func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte
 			fmt.Println(err)
 			return err
 		}
-		writerTorrent, err := d.Writer(ctx, subPath + ".torrent", false)
+		writerTorrent, err := d.Writer(ctx, subPath+".torrent", false)
 		err = mi.Write(writerTorrent)
 		writerTorrent.Commit()
+
+		torrent, _ := torrentclient.GetClient().AddTorrent(&mi)
+		torrent.DownloadAll()
+		if !torrentclient.GetClient().WaitAll() && !torrent.Seeding() {
+			fmt.Println("TORRENT IS NOT SEEDING")
+		}
 	}
 
 	return returnCode

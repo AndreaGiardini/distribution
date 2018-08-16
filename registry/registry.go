@@ -19,6 +19,7 @@ import (
 	"github.com/docker/distribution/health"
 	"github.com/docker/distribution/registry/handlers"
 	"github.com/docker/distribution/registry/listener"
+	"github.com/docker/distribution/registry/torrentclient"
 	"github.com/docker/distribution/uuid"
 	"github.com/docker/distribution/version"
 	gorhandlers "github.com/gorilla/handlers"
@@ -182,6 +183,9 @@ func (registry *Registry) ListenAndServe() error {
 	} else {
 		context.GetLogger(registry.app).Infof("listening on %v", ln.Addr())
 	}
+
+	torrentclient.Create()
+	defer torrentclient.GetClient().Close()
 
 	return registry.server.Serve(ln)
 }
