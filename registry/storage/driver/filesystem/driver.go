@@ -205,11 +205,15 @@ func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte
 		err = mi.Write(writerTorrent)
 		writerTorrent.Commit()
 
-		torrent, _ := torrentclient.GetClient().AddTorrent(&mi)
+		trimmedSubpath := strings.TrimSuffix(subPath, "data")
+
+		torrentSpec := torrentclient.TorrentSpecFromMI(&mi)
+		torrentSpec.Storage = torrentclient.GetClientStorage(d.fullPath(trimmedSubpath))
+		torrent, _, _ := torrentclient.GetClient().AddTorrentSpec(torrentSpec)
+		torrent.AddTrackers(builtinAnnounceList)
 		torrent.DownloadAll()
-		if !torrentclient.GetClient().WaitAll() && !torrent.Seeding() {
-			fmt.Println("TORRENT IS NOT SEEDING")
-		}
+		torrentclient.GetClient().WaitAll()
+		fmt.Println("Am I seeding: ", torrent.Seeding())
 	}
 
 	return returnCode
