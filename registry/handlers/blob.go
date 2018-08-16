@@ -9,8 +9,7 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/gorilla/handlers"
-	"strings"
-)
+	)
 
 // blobDispatcher uses the request context to build a blobHandler.
 func blobDispatcher(ctx *Context, r *http.Request) http.Handler {
@@ -74,11 +73,6 @@ func (bh *blobHandler) GetBlob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strings.HasSuffix(desc.Digest.String(), "torrent") {
-		w.WriteHeader(http.StatusBadGateway)
-		context.GetLogger(bh).Debugf("THIS IS A TORRENT FILE")
-		return
-	}
 	if err := blobs.ServeBlob(bh, w, r, desc.Digest); err != nil {
 		context.GetLogger(bh).Debugf("unexpected error getting blob HTTP handler: %v", err)
 		bh.Errors = append(bh.Errors, errcode.ErrorCodeUnknown.WithDetail(err))

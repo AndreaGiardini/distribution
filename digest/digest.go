@@ -83,7 +83,7 @@ func FromBytes(p []byte) Digest {
 // Validate checks that the contents of d is a valid digest, returning an
 // error if not.
 func (d Digest) Validate() error {
-	s := string(d)
+	s := strings.Split(string(d), ".")[0]
 
 	if !DigestRegexpAnchored.MatchString(s) {
 		return ErrDigestInvalidFormat

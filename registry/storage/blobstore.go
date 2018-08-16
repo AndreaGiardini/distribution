@@ -7,6 +7,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/docker/distribution/digest"
 	"github.com/docker/distribution/registry/storage/driver"
+	"strings"
 )
 
 // blobStore implements the read side of the blob store interface over a
@@ -119,9 +120,19 @@ func (bs *blobStore) Enumerate(ctx context.Context, ingester func(dgst digest.Di
 // path returns the canonical path for the blob identified by digest. The blob
 // may or may not exist.
 func (bs *blobStore) path(dgst digest.Digest) (string, error) {
-	bp, err := pathFor(blobDataPathSpec{
-		digest: dgst,
-	})
+
+	var err error
+	var bp string
+
+	if strings.HasSuffix(dgst.String(), "torrent") {
+		bp, err = pathFor(blobDataTorrentPathSpec{
+			digest: dgst,
+		})
+	} else {
+		bp, err = pathFor(blobDataPathSpec{
+			digest: dgst,
+		})
+	}
 
 	if err != nil {
 		return "", err
@@ -176,10 +187,18 @@ func (bs *blobStatter) Stat(ctx context.Context, dgst digest.Digest) (distributi
 
 	context.GetLogger(ctx).Info("I AM STATTING DIGEST: " + dgst.String())
 
-	path, err := pathFor(blobDataPathSpec{
-		digest: dgst,
-	})
+	path := ""
+	var err error = nil
 
+	if strings.HasSuffix(dgst.String(), "torrent") {
+		path, err = pathFor(blobDataTorrentPathSpec{
+			digest: dgst,
+		})
+	} else {
+		path, err = pathFor(blobDataPathSpec{
+			digest: dgst,
+		})
+	}
 
 	if err != nil {
 		return distribution.Descriptor{}, err
