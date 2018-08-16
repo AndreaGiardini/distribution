@@ -9,7 +9,7 @@ import (
 	"github.com/docker/distribution/registry/api/errcode"
 	"github.com/docker/distribution/registry/api/v2"
 	"github.com/gorilla/handlers"
-	)
+)
 
 // blobDispatcher uses the request context to build a blobHandler.
 func blobDispatcher(ctx *Context, r *http.Request) http.Handler {

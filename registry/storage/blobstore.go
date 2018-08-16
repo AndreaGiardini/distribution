@@ -188,7 +188,7 @@ func (bs *blobStatter) Stat(ctx context.Context, dgst digest.Digest) (distributi
 	context.GetLogger(ctx).Info("I AM STATTING DIGEST: " + dgst.String())
 
 	path := ""
-	var err error = nil
+	var err error
 
 	if strings.HasSuffix(dgst.String(), "torrent") {
 		path, err = pathFor(blobDataTorrentPathSpec{
