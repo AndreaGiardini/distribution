@@ -181,8 +181,8 @@ func (d *driver) PutContent(ctx context.Context, subPath string, contents []byte
 	if strings.HasSuffix(subPath, "data") {
 		fmt.Println("I AM CREATING THE TORRENT")
 		builtinAnnounceList := [][]string{
-			{"udp://thisismytorrent:80"},
-		}
+				{"udp://localhost:6969"},
+			}
 
 		mi := metainfo.MetaInfo{
 			AnnounceList: builtinAnnounceList,

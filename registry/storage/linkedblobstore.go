@@ -12,6 +12,7 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/docker/distribution/registry/storage/driver"
 	"github.com/docker/distribution/uuid"
+	"strings"
 )
 
 // linkPathFunc describes a function that can resolve a link based on the
@@ -417,6 +418,10 @@ func (lbs *linkedBlobStatter) Stat(ctx context.Context, dgst digest.Digest) (dis
 	// TODO(stevvooe): Look up repository local mediatype and replace that on
 	// the returned descriptor.
 
+	if strings.HasSuffix(dgst.String(), "torrent") {
+		target += ".torrent"
+	}
+
 	return lbs.blobStore.statter.Stat(ctx, target)
 }
 
@@ -451,7 +456,7 @@ func (lbs *linkedBlobStatter) resolveWithLinkFunc(ctx context.Context, dgst dige
 		return "", err
 	}
 
-	return lbs.blobStore.readlink(ctx, blobLinkPath)
+	return lbs.blobStore.readlink(ctx, strings.Split(blobLinkPath, ".")[0])
 }
 
 func (lbs *linkedBlobStatter) SetDescriptor(ctx context.Context, dgst digest.Digest, desc distribution.Descriptor) error {

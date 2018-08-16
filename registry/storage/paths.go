@@ -239,6 +239,15 @@ func pathFor(spec pathSpec) (string, error) {
 		components = append(components, "data")
 		blobPathPrefix := append(rootPrefix, "blobs")
 		return path.Join(append(blobPathPrefix, components...)...), nil
+	case blobDataTorrentPathSpec:
+		components, err := digestPathComponents(v.digest, true)
+		if err != nil {
+			return "", err
+		}
+
+		components = append(components, "data.torrent")
+		blobPathPrefix := append(rootPrefix, "blobs")
+		return path.Join(append(blobPathPrefix, components...)...), nil
 
 	case uploadDataPathSpec:
 		return path.Join(append(repoPrefix, v.name, "_uploads", v.id, "data")...), nil
@@ -396,6 +405,14 @@ type blobDataPathSpec struct {
 
 func (blobDataPathSpec) pathSpec() {}
 
+// blobDataTorrentPathSpec contains the path for the registry global blob store. For
+// now, this contains layer data.torrent, exclusively.
+type blobDataTorrentPathSpec struct {
+	digest digest.Digest
+}
+
+func (blobDataTorrentPathSpec) pathSpec() {}
+
 // uploadDataPathSpec defines the path parameters of the data file for
 // uploads.
 type uploadDataPathSpec struct {
@@ -455,7 +472,7 @@ func digestPathComponents(dgst digest.Digest, multilevel bool) ([]string, error)
 	}
 
 	algorithm := blobAlgorithmReplacer.Replace(string(dgst.Algorithm()))
-	hex := dgst.Hex()
+	hex := strings.Split(dgst.Hex(), ".")[0]
 	prefix := []string{algorithm}
 
 	var suffix []string
