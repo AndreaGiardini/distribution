@@ -4,12 +4,11 @@ import "github.com/anacrolix/torrent"
 
 var client *torrent.Client
 
-var clientConfig = &torrent.ClientConfig{
-	Seed: true,
-}
+var clientConfig = torrent.NewDefaultClientConfig()
 
 // Create a Torrent Client
 func Create() *torrent.Client {
+	clientConfig.Seed = true
 	client, _ = torrent.NewClient(clientConfig)
 	return client
 }
