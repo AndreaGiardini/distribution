@@ -173,9 +173,13 @@ var _ distribution.BlobDescriptorService = &blobStatter{}
 // in the main blob store. If this method returns successfully, there is
 // strong guarantee that the blob exists and is available.
 func (bs *blobStatter) Stat(ctx context.Context, dgst digest.Digest) (distribution.Descriptor, error) {
+
+	context.GetLogger(ctx).Info("I AM STATTING DIGEST: " + dgst.String())
+
 	path, err := pathFor(blobDataPathSpec{
 		digest: dgst,
 	})
+
 
 	if err != nil {
 		return distribution.Descriptor{}, err

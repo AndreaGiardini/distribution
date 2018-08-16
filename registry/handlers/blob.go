@@ -57,6 +57,11 @@ type blobHandler struct {
 func (bh *blobHandler) GetBlob(w http.ResponseWriter, r *http.Request) {
 	context.GetLogger(bh).Debug("GetBlob")
 	context.GetLogger(bh).Info("YOLOOOOOOOOOOOOOOOOOOOOOOOO" + bh.Digest.String())
+
+	if r.Header.Get("ISTORRENT") != "" {
+		context.GetLogger(bh).Info("TORRENT REQUEST DETECTED")
+	}
+
 	blobs := bh.Repository.Blobs(bh)
 	desc, err := blobs.Stat(bh, bh.Digest)
 
